@@ -4,8 +4,7 @@ Copyright (C) 2001-4 Igor Pavlov ( http://www.7-zip.org )
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
+License version 2.1 as published by the Free Software Foundation.
 
 This library is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,7 +26,7 @@ namespace NWindow {
 
 // m_KeepSizeBefore: how mach BYTEs must be in buffer before m_Pos;
 // m_KeepSizeAfter: how mach BYTEs must be in buffer after m_Pos;
-// m_KeepSizeReserv: how mach BYTEs must be in buffer for Moving Reserv; 
+// m_KeepSizeReserv: how mach BYTEs must be in buffer for Moving Reserv;
 //                    must be >= aKeepSizeAfter; // test it
 
 class COut
@@ -55,25 +54,25 @@ public:
 
   void Init(ISequentialOutStream *aStream, bool aSolid = false);
   HRESULT Flush();
-  
   UINT32 GetCurPos() const { return m_Pos; }
   const BYTE *GetPointerToCurrentPos() const { return m_Buffer + m_Pos;};
 
   void CopyBackBlock(UINT32 aDistance, UINT32 aLen)
   {
     if (m_Pos >= m_PosLimit)
-      MoveBlockBackward();  
+      MoveBlockBackward();
     BYTE *p = m_Buffer + m_Pos;
     aDistance++;
+   BYTE *p2 = p - aDistance;
     for(UINT32 i = 0; i < aLen; i++)
-      p[i] = p[i - aDistance];
+      p[i] = p2[i];
     m_Pos += aLen;
   }
 
   void PutOneByte(BYTE aByte)
   {
     if (m_Pos >= m_PosLimit)
-      MoveBlockBackward();  
+      MoveBlockBackward();
     m_Buffer[m_Pos++] = aByte;
   }
 

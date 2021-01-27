@@ -1,11 +1,9 @@
 /*
-Copyright (C) 2004 NSRT Team ( http://nsrt.edgeemu.com )
+Copyright (C) 2004-2006 NSRT Team ( http://nsrt.edgeemu.com )
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either
-version 2 of the License, or (at your option) any later
-version.
+version 2 as published by the Free Software Foundation.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -18,6 +16,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #include <stdlib.h>
+#include "crc32.h"
 
 namespace CRC32lib
 {
@@ -67,12 +66,12 @@ namespace CRC32lib
   0x54de5729, 0x23d967bf, 0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94,
   0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d };
 
-  
+
   //CRC32 for char arrays
-  unsigned int CRC32(const unsigned char *array, size_t size, register unsigned int crc32)
+  unsigned int CRC32(const unsigned char *array, size_t size, unsigned int crc32)
   {
     const unsigned char *end_p = array+size;
-    for (register const unsigned char *p = array; p < end_p; p++)
+    for (const unsigned char *p = array; p < end_p; p++)
     {
       crc32 = ((crc32 >> 8) & 0x00FFFFFF) ^ crc32Table[(crc32 ^ *p) & 0xFF];
     }

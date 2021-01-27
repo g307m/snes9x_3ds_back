@@ -4,8 +4,7 @@ Copyright (C) 2001-4 Igor Pavlov ( http://www.7-zip.org )
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
+License version 2.1 as published by the Free Software Foundation.
 
 This library is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -43,7 +42,6 @@ public:
       m_Range <<= 8;
     }
   }
-  
   void Init(ISequentialInStream *aStream)
   {
     m_Stream.Init(aStream);
@@ -71,7 +69,6 @@ public:
     m_Range >>= aNumTotalBits;
     UINT32 aThreshold = m_Code / m_Range;
     m_Code -= aThreshold * m_Range;
-    
     Normalize();
     return aThreshold;
   }
@@ -88,7 +85,7 @@ public:
   UINT32 DecodeDirectBits(UINT32 aNumTotalBits)
   {
     UINT32 aRange = m_Range;
-    UINT32 aCode = m_Code;        
+    UINT32 aCode = m_Code;
     UINT32 aResult = 0;
     for (UINT32 i = aNumTotalBits; i > 0; i--)
     {
@@ -109,7 +106,7 @@ public:
       if (aRange < kTopValue)
       {
         aCode = (aCode << 8) | m_Stream.ReadByte();
-        aRange <<= 8; 
+        aRange <<= 8;
       }
     }
     m_Range = aRange;

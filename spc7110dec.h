@@ -19,8 +19,6 @@
 #ifndef _SPC7110DEC_H_
 #define _SPC7110DEC_H_
 
-#define SPC7110_DECOMP_BUFFER_SIZE	64
-
 class SPC7110Decomp {
 public:
   uint8 read();
@@ -32,11 +30,6 @@ public:
 
   unsigned decomp_mode;
   unsigned decomp_offset;
-
-  unsigned original_decomp_mode;
-  unsigned original_decomp_offset;
-  unsigned original_decomp_index;
-  unsigned read_counter;
 
   //read() will spool chunks half the size of decomp_buffer_size
   enum { decomp_buffer_size = SPC7110_DECOMP_BUFFER_SIZE }; //must be >= 64, and must be a power of two
@@ -63,7 +56,7 @@ public:
   uint8 probability(unsigned n);
   uint8 next_lps(unsigned n);
   uint8 next_mps(unsigned n);
-  bool toggle_invert(unsigned n);
+  uint8 toggle_invert(unsigned n);
 
   unsigned morton16[2][256];
   unsigned morton32[4][256];

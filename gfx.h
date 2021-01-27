@@ -1,373 +1,224 @@
-/*******************************************************************************
-  Snes9x - Portable Super Nintendo Entertainment System (TM) emulator.
- 
-  (c) Copyright 1996 - 2002 Gary Henderson (gary.henderson@ntlworld.com) and
-                            Jerremy Koot (jkoot@snes9x.com)
-
-  (c) Copyright 2001 - 2004 John Weidman (jweidman@slip.net)
-
-  (c) Copyright 2002 - 2004 Brad Jorsch (anomie@users.sourceforge.net),
-                            funkyass (funkyass@spam.shaw.ca),
-                            Joel Yliluoma (http://iki.fi/bisqwit/)
-                            Kris Bleakley (codeviolation@hotmail.com),
-                            Matthew Kendora,
-                            Nach (n-a-c-h@users.sourceforge.net),
-                            Peter Bortas (peter@bortas.org) and
-                            zones (kasumitokoduck@yahoo.com)
-
-  C4 x86 assembler and some C emulation code
-  (c) Copyright 2000 - 2003 zsKnight (zsknight@zsnes.com),
-                            _Demo_ (_demo_@zsnes.com), and Nach
-
-  C4 C++ code
-  (c) Copyright 2003 Brad Jorsch
-
-  DSP-1 emulator code
-  (c) Copyright 1998 - 2004 Ivar (ivar@snes9x.com), _Demo_, Gary Henderson,
-                            John Weidman, neviksti (neviksti@hotmail.com),
-                            Kris Bleakley, Andreas Naive
-
-  DSP-2 emulator code
-  (c) Copyright 2003 Kris Bleakley, John Weidman, neviksti, Matthew Kendora, and
-                     Lord Nightmare (lord_nightmare@users.sourceforge.net
-
-  OBC1 emulator code
-  (c) Copyright 2001 - 2004 zsKnight, pagefault (pagefault@zsnes.com) and
-                            Kris Bleakley
-  Ported from x86 assembler to C by sanmaiwashi
-
-  SPC7110 and RTC C++ emulator code
-  (c) Copyright 2002 Matthew Kendora with research by
-                     zsKnight, John Weidman, and Dark Force
-
-  S-DD1 C emulator code
-  (c) Copyright 2003 Brad Jorsch with research by
-                     Andreas Naive and John Weidman
- 
-  S-RTC C emulator code
-  (c) Copyright 2001 John Weidman
-  
-  ST010 C++ emulator code
-  (c) Copyright 2003 Feather, Kris Bleakley, John Weidman and Matthew Kendora
-
-  Super FX x86 assembler emulator code 
-  (c) Copyright 1998 - 2003 zsKnight, _Demo_, and pagefault 
-
-  Super FX C emulator code 
-  (c) Copyright 1997 - 1999 Ivar, Gary Henderson and John Weidman
-
-
-  SH assembler code partly based on x86 assembler code
-  (c) Copyright 2002 - 2004 Marcus Comstedt (marcus@mc.pp.se) 
-
- 
-  Specific ports contains the works of other authors. See headers in
-  individual files.
- 
-  Snes9x homepage: http://www.snes9x.com
- 
-  Permission to use, copy, modify and distribute Snes9x in both binary and
-  source form, for non-commercial purposes, is hereby granted without fee,
-  providing that this license information and copyright notice appear with
-  all copies and any derived work.
- 
-  This software is provided 'as-is', without any express or implied
-  warranty. In no event shall the authors be held liable for any damages
-  arising from the use of this software.
- 
-  Snes9x is freeware for PERSONAL USE only. Commercial users should
-  seek permission of the copyright holders first. Commercial use includes
-  charging money for Snes9x or software derived from Snes9x.
- 
-  The copyright holders request that bug fixes and improvements to the code
-  should be forwarded to them so everyone can benefit from the modifications
-  in future versions.
- 
-  Super NES and Super Nintendo Entertainment System are trademarks of
-  Nintendo Co., Limited and its subsidiary companies.
-*******************************************************************************/
+/*****************************************************************************\
+     Snes9x - Portable Super Nintendo Entertainment System (TM) emulator.
+                This file is licensed under the Snes9x License.
+   For further information, consult the LICENSE file in the root directory.
+\*****************************************************************************/
 
 #ifndef _GFX_H_
 #define _GFX_H_
 
 #include "port.h"
-#include "snes9x.h"
 
+struct SGFX
+{
+	uint16	*Screen;
+	uint16	*SubScreen;
+	uint8	*ZBuffer;
+	uint8	*SubZBuffer;
+	uint32	Pitch;
+	uint32	ScreenSize;
+	uint16	*S;
+	uint8	*DB;
+	uint16	*ZERO;
+	uint32	RealPPL;			// true PPL of Screen buffer
+	uint32	PPL;				// number of pixels on each of Screen buffer
+	uint32	LinesPerTile;		// number of lines in 1 tile (4 or 8 due to interlace)
+	uint16	*ScreenColors;		// screen colors for rendering main
+	uint16	*RealScreenColors;	// screen colors, ignoring color window clipping
+	uint8	Z1;					// depth for comparison
+	uint8	Z2;					// depth to save
+	uint32	FixedColour;
+	uint8	DoInterlace;
+	uint8	InterlaceFrame;
+	uint32	StartY;
+	uint32	EndY;
+	bool8	ClipColors;
+	uint8	OBJWidths[128];
+	uint8	OBJVisibleTiles[128];
 
-struct SGFX{
-    // Initialize these variables
-    uint8  *Screen;
-    uint8  *SubScreen;
-    uint8  *ZBuffer;
-    uint8  *SubZBuffer;
-    uint32 Pitch;
+	struct ClipData	*Clip;
 
-    // Setup in call to S9xGraphicsInit()
-    int   Delta;
-    uint16 *X2;
-    uint16 *ZERO_OR_X2;
-    uint16 *ZERO;
-    uint32 RealPitch; // True pitch of Screen buffer.
-    uint32 Pitch2;    // Same as RealPitch except while using speed up hack for Glide.
-    uint32 ZPitch;    // Pitch of ZBuffer
-    uint32 PPL;	      // Number of pixels on each of Screen buffer
-    uint32 PPLx2;
-    uint32 PixSize;
-    uint8  *S;
-    uint8  *DB;
-    uint16 *ScreenColors;
-    uint32 DepthDelta;
-    uint8  Z1;          // Depth for comparison
-    uint8  Z2;          // Depth to save
-    uint8  ZSprite;     // Used to ensure only 1st sprite is drawn per pixel
-    uint32 FixedColour;
-    const char *InfoString;
-    uint32 InfoStringTimeout;
-    uint32 StartY;
-    uint32 EndY;
-    struct ClipData *pCurrentClip;
-    uint32 Mode7Mask;
-    uint32 Mode7PriorityMask;
-    uint8  OBJWidths[128];
-    uint8  OBJVisibleTiles[128];
-    struct {
-        uint8 RTOFlags;
-        int16 Tiles;
-        struct {
-            int8 Sprite;
-            uint8 Line;
-        } OBJ[32];
-        int OBJCount;
-    } OBJLines [SNES_HEIGHT_EXTENDED];
+	struct
+	{
+		uint8	RTOFlags;
+		int16	Tiles;
 
-    uint8  r212c;
-    uint8  r212d;
-    uint8  r2130;
-    uint8  r2131;
-    bool8  Pseudo;
-    
-#ifdef GFX_MULTI_FORMAT
-    uint32 PixelFormat;
-    uint32 (*BuildPixel) (uint32 R, uint32 G, uint32 B);
-    uint32 (*BuildPixel2) (uint32 R, uint32 G, uint32 B);
-    void   (*DecomposePixel) (uint32 Pixel, uint32 &R, uint32 &G, uint32 &B);
-#endif
+		struct
+		{
+			int8	Sprite;
+			uint8	Line;
+		}	OBJ[128];
+	}	OBJLines[SNES_HEIGHT_EXTENDED];
 
-    uint8  PreviousFrameBrightness = 0;
-    
-    // Screen colors for Mode 7 Ext BG
-    //
-    uint16 ScreenRGB555toRGBA4[0x10000];
-    uint16 ScreenColors128[256]; 
+	void	(*DrawBackdropMath) (uint32, uint32, uint32);
+	void	(*DrawBackdropNomath) (uint32, uint32, uint32);
+	void	(*DrawTileMath) (uint32, uint32, uint32, uint32);
+	void	(*DrawTileNomath) (uint32, uint32, uint32, uint32);
+	void	(*DrawClippedTileMath) (uint32, uint32, uint32, uint32, uint32, uint32);
+	void	(*DrawClippedTileNomath) (uint32, uint32, uint32, uint32, uint32, uint32);
+	void	(*DrawMosaicPixelMath) (uint32, uint32, uint32, uint32, uint32, uint32);
+	void	(*DrawMosaicPixelNomath) (uint32, uint32, uint32, uint32, uint32, uint32);
+	void	(*DrawMode7BG1Math) (uint32, uint32, int);
+	void	(*DrawMode7BG1Nomath) (uint32, uint32, int);
+	void	(*DrawMode7BG2Math) (uint32, uint32, int);
+	void	(*DrawMode7BG2Nomath) (uint32, uint32, int);
 
-    // Tracks when the palette was last modified.
-    //
-    uint32 PaletteFrame256[1] = { 1 };    
-    uint32 PaletteFrame[16] = { 1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1 };    // 16-color BGs / OBJs
-    uint32 PaletteFrame4BG[4][16] = 
-        { 
-            { 1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1 }, 
-            { 1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1 }, 
-            { 1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1 }, 
-            { 1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1 } 
-        };   // Mode 1 4-color BGs
-    
-    // Memory Usage = 0.50 MB    for the frame the palette was changed for the given Tile.
-    //
-    uint32 VRAMPaletteFrame[8192][16];
-    bool   Use3DSHardware = true;
-
+	const char	*InfoString;
+	uint32	InfoStringTimeout;
+	char	FrameDisplayString[256];
 };
-
-struct SLineData {
-    struct {
-	uint16 VOffset;
-	uint16 HOffset;
-    } BG [4];
-
-    uint8   FixedColour[4];             // Sub Screen
-
-};
-
-#define H_FLIP 0x4000
-#define V_FLIP 0x8000
-#define BLANK_TILE 2
 
 struct SBG
 {
-    uint32 TileSize;
-    uint32 BitShift;
-    uint32 TileShift;
-    uint32 TileAddress;
-    uint32 NameSelect;
-    uint32 SCBase;
+	uint8	(*ConvertTile) (uint8 *, uint32, uint32);
+	uint8	(*ConvertTileFlip) (uint8 *, uint32, uint32);
 
-    uint32 StartPalette;
-    uint32 PaletteShift;
-    uint32 PaletteMask;
-    
-    uint8 *Buffer;
-    uint8 *Buffered;
-    bool8  DirectColourMode;
+	uint32	TileSizeH;
+	uint32	TileSizeV;
+	uint32	OffsetSizeH;
+	uint32	OffsetSizeV;
+	uint32	TileShift;
+	uint32	TileAddress;
+	uint32	NameSelect;
+	uint32	SCBase;
 
-    
-    int    Depth;
-    
-    //bool8 TileFull[4096];
-    
-    //uint16 BufferTile16Bit[1][1];
-    
-    /*
-    // Memory Usage = 0.5 MB for background parameters
-    //
-    uint16 DrawTileParameters[4][8192][8];
-    uint16 DrawTileCount[4];
+	uint32	StartPalette;
+	uint32	PaletteShift;
+	uint32	PaletteMask;
+	uint8	EnableMath;
+	uint8	InterlaceLine;
 
-    // Memory Usage = 3.0 MB for sprite parameters    
-    int32 DrawOBJTileLaterParameters[65536][8];
-    uint16 DrawOBJTileLaterParametersCount;
-    uint16 DrawOBJTileLaterIndex[4][65536];
-    uint16 DrawOBJTileLaterIndexCount[4];
-    */
-
+	uint8	*Buffer;
+	uint8	*BufferFlip;
+	uint8	*Buffered;
+	uint8	*BufferedFlip;
+	bool8	DirectColourMode;
 };
 
+struct SLineData
+{
+	struct
+	{
+		uint16	VOffset;
+		uint16	HOffset;
+	}	BG[4];
+};
 
 struct SLineMatrixData
 {
-    short MatrixA;
-    short MatrixB;
-    short MatrixC;
-    short MatrixD;
-    short CentreX;
-    short CentreY;
+	short	MatrixA;
+	short	MatrixB;
+	short	MatrixC;
+	short	MatrixD;
+	short	CentreX;
+	short	CentreY;
+	short	M7HOFS;
+	short	M7VOFS;
 };
 
-extern uint32 odd_high [4][16];
-extern uint32 odd_low [4][16];
-extern uint32 even_high [4][16];
-extern uint32 even_low [4][16];
-extern SBG BG;
-extern uint16 DirectColourMaps [8][256];
+extern uint16		BlackColourMap[256];
+extern uint16		DirectColourMaps[8][256];
+extern uint8		mul_brightness[16][32];
+extern uint8		brightness_cap[64];
+extern struct SBG	BG;
+extern struct SGFX	GFX;
 
-extern uint8 add32_32 [32][32];
-extern uint8 add32_32_half [32][32];
-extern uint8 sub32_32 [32][32];
-extern uint8 sub32_32_half [32][32];
-extern uint8 mul_brightness [16][32];
+#define H_FLIP		0x4000
+#define V_FLIP		0x8000
+#define BLANK_TILE	2
 
-// Could use BSWAP instruction on Intel port...
-#define SWAP_DWORD(dw) dw = ((dw & 0xff) << 24) | ((dw & 0xff00) << 8) | \
-		            ((dw & 0xff0000) >> 8) | ((dw & 0xff000000) >> 24)
-
-#ifdef FAST_LSB_WORD_ACCESS
-#define READ_2BYTES(s) (*(uint16 *) (s))
-#define WRITE_2BYTES(s, d) *(uint16 *) (s) = (d)
-#else
-#ifdef LSB_FIRST
-#define READ_2BYTES(s) (*(uint8 *) (s) | (*((uint8 *) (s) + 1) << 8))
-#define WRITE_2BYTES(s, d) *(uint8 *) (s) = (d), \
-			   *((uint8 *) (s) + 1) = (d) >> 8
-#else  // else MSB_FISRT
-#define READ_2BYTES(s) (*(uint8 *) (s) | (*((uint8 *) (s) + 1) << 8))
-#define WRITE_2BYTES(s, d) *(uint8 *) (s) = (d), \
-			   *((uint8 *) (s) + 1) = (d) >> 8
-#endif // LSB_FIRST
-#endif // i386
-
-#define SUB_SCREEN_DEPTH 0
-#define MAIN_SCREEN_DEPTH 32
-
-#define OLD_COLOUR_BLENDING
-
-#if defined(OLD_COLOUR_BLENDING)
-#define COLOR_ADD(C1, C2) \
-GFX.X2 [((((C1) & RGB_REMOVE_LOW_BITS_MASK) + \
-	  ((C2) & RGB_REMOVE_LOW_BITS_MASK)) >> 1)]
-#else
-#define COLOR_ADD(C1, C2) \
-(GFX.X2 [((((C1) & RGB_REMOVE_LOW_BITS_MASK) + \
-	  ((C2) & RGB_REMOVE_LOW_BITS_MASK)) >> 1) + \
-	 ((C1) & (C2) & RGB_LOW_BITS_MASK)] | \
- (((C1) ^ (C2)) & RGB_LOW_BITS_MASK))	   
-#endif
-
-#define COLOR_ADD1_2(C1, C2) \
-(((((C1) & RGB_REMOVE_LOW_BITS_MASK) + \
-          ((C2) & RGB_REMOVE_LOW_BITS_MASK)) >> 1) | ALPHA_BITS_MASK)
-
-#if defined(OLD_COLOUR_BLENDING)
-#define COLOR_SUB(C1, C2) \
-GFX.ZERO_OR_X2 [(((C1) | RGB_HI_BITS_MASKx2) - \
-		 ((C2) & RGB_REMOVE_LOW_BITS_MASK)) >> 1]
-#elif !defined(NEW_COLOUR_BLENDING)
-#define COLOR_SUB(C1, C2) \
-(GFX.ZERO_OR_X2 [(((C1) | RGB_HI_BITS_MASKx2) - \
-                  ((C2) & RGB_REMOVE_LOW_BITS_MASK)) >> 1] + \
-((C1) & RGB_LOW_BITS_MASK) - ((C2) & RGB_LOW_BITS_MASK))
-#else
-inline uint16 COLOR_SUB(uint16, uint16);
-
-inline uint16 COLOR_SUB(uint16 C1, uint16 C2)
+struct COLOR_ADD
 {
-	uint16	mC1, mC2, v = 0;
+	static alwaysinline uint16 fn(uint16 C1, uint16 C2)
+	{
+		const int RED_MASK = 0x1F << RED_SHIFT_BITS;
+		const int GREEN_MASK = 0x1F << GREEN_SHIFT_BITS;
+		const int BLUE_MASK = 0x1F;
 
-	mC1 = C1 & FIRST_COLOR_MASK;
-	mC2 = C2 & FIRST_COLOR_MASK;
-	if (mC1 > mC2) v += (mC1 - mC2);
-	
-	mC1 = C1 & SECOND_COLOR_MASK;
-	mC2 = C2 & SECOND_COLOR_MASK;
-	if (mC1 > mC2) v += (mC1 - mC2);
-
-	mC1 = C1 & THIRD_COLOR_MASK;
-	mC2 = C2 & THIRD_COLOR_MASK;
-	if (mC1 > mC2) v += (mC1 - mC2);
-	
-	return v;
-}
+		int rb = C1 & (RED_MASK | BLUE_MASK);
+		rb += C2 & (RED_MASK | BLUE_MASK);
+		int rbcarry = rb & ((0x20 << RED_SHIFT_BITS) | (0x20 << 0));
+		int g = (C1 & (GREEN_MASK)) + (C2 & (GREEN_MASK));
+		int rgbsaturate = (((g & (0x20 << GREEN_SHIFT_BITS)) | rbcarry) >> 5) * 0x1f;
+		uint16 retval = (rb & (RED_MASK | BLUE_MASK)) | (g & GREEN_MASK) | rgbsaturate;
+#if GREEN_SHIFT_BITS == 6
+		retval |= (retval & 0x0400) >> 5;
 #endif
+		return retval;
+	}
 
-#define COLOR_SUB1_2(C1, C2) \
-GFX.ZERO [(((C1) | RGB_HI_BITS_MASKx2) - \
-	   ((C2) & RGB_REMOVE_LOW_BITS_MASK)) >> 1]
+	static alwaysinline uint16 fn1_2(uint16 C1, uint16 C2)
+	{
+		return ((((C1 & RGB_REMOVE_LOW_BITS_MASK) +
+			(C2 & RGB_REMOVE_LOW_BITS_MASK)) >> 1) +
+			(C1 & C2 & RGB_LOW_BITS_MASK)) | ALPHA_BITS_MASK;
+	}
+};
 
-typedef void (*NormalTileRenderer) (uint32 Tile, uint32 Offset, 
-				    uint32 StartLine, uint32 LineCount);
-typedef void (*ClippedTileRenderer) (uint32 Tile, uint32 Offset,
-				     uint32 StartPixel, uint32 Width,
-				     uint32 StartLine, uint32 LineCount);
-typedef void (*LargePixelRenderer) (uint32 Tile, uint32 Offset,
-				    uint32 StartPixel, uint32 Pixels,
-				    uint32 StartLine, uint32 LineCount);
+struct COLOR_ADD_BRIGHTNESS
+{
+	static alwaysinline uint16 fn(uint16 C1, uint16 C2)
+	{
+		return ((brightness_cap[ (C1 >> RED_SHIFT_BITS)           +  (C2 >> RED_SHIFT_BITS)          ] << RED_SHIFT_BITS)   |
+				(brightness_cap[((C1 >> GREEN_SHIFT_BITS) & 0x1f) + ((C2 >> GREEN_SHIFT_BITS) & 0x1f)] << GREEN_SHIFT_BITS) |
+	// Proper 15->16bit color conversion moves the high bit of green into the low bit.
+	#if GREEN_SHIFT_BITS == 6
+			   ((brightness_cap[((C1 >> 6) & 0x1f) + ((C2 >> 6) & 0x1f)] & 0x10) << 1) |
+	#endif
+				(brightness_cap[ (C1                      & 0x1f) +  (C2                      & 0x1f)]      ));
+	}
 
-START_EXTERN_C
-void S9xStartScreenRefresh ();
-void S9xDrawScanLine (uint8 Line);
-void S9xEndScreenRefresh ();
-void S9xSetupOBJ ();
-void S9xUpdateScreenSoftware ();
-void S9xUpdateScreenHardware ();
-void RenderLine (uint8 line);
-void S9xBuildDirectColourMaps ();
-void S9xUpdatePalettes();
+	static alwaysinline uint16 fn1_2(uint16 C1, uint16 C2)
+	{
+		return COLOR_ADD::fn1_2(C1, C2);
+	}
+};
 
-// External port interface which must be implemented or initialised for each
-// port.
-extern struct SGFX GFX;
 
-bool8 S9xGraphicsInit ();
-void S9xGraphicsDeinit();
+struct COLOR_SUB
+{
+	static alwaysinline uint16 fn(uint16 C1, uint16 C2)
+	{
+		int rb1 = (C1 & (THIRD_COLOR_MASK | FIRST_COLOR_MASK)) | ((0x20 << 0) | (0x20 << RED_SHIFT_BITS));
+		int rb2 = C2 & (THIRD_COLOR_MASK | FIRST_COLOR_MASK);
+		int rb = rb1 - rb2;
+		int rbcarry = rb & ((0x20 << RED_SHIFT_BITS) | (0x20 << 0));
+		int g = ((C1 & (SECOND_COLOR_MASK)) | (0x20 << GREEN_SHIFT_BITS)) - (C2 & (SECOND_COLOR_MASK));
+		int rgbsaturate = (((g & (0x20 << GREEN_SHIFT_BITS)) | rbcarry) >> 5) * 0x1f;
+		uint16 retval = ((rb & (THIRD_COLOR_MASK | FIRST_COLOR_MASK)) | (g & SECOND_COLOR_MASK)) & rgbsaturate;
+#if GREEN_SHIFT_BITS == 6
+		retval |= (retval & 0x0400) >> 5;
+#endif
+		return retval;
+	}
+
+	static alwaysinline uint16 fn1_2(uint16 C1, uint16 C2)
+	{
+		return GFX.ZERO[((C1 | RGB_HI_BITS_MASKx2) -
+			(C2 & RGB_REMOVE_LOW_BITS_MASK)) >> 1];
+	}
+};
+
+void S9xStartScreenRefresh (void);
+void S9xEndScreenRefresh (void);
+void S9xBuildDirectColourMaps (void);
+void RenderLine (uint8);
+void S9xComputeClipWindows (void);
+void S9xDisplayChar (uint16 *, uint8);
+void S9xGraphicsScreenResize (void);
+// called automatically unless Settings.AutoDisplayMessages is false
+void S9xDisplayMessages (uint16 *, int, int, int, int);
+
+// external port interface which must be implemented or initialised for each port
+bool8 S9xGraphicsInit (void);
+void S9xGraphicsDeinit (void);
 bool8 S9xInitUpdate (void);
-bool8 S9xDeinitUpdate (int Width, int Height, bool8 sixteen_bit);
-void S9xSetPalette ();
-void S9xSyncSpeed ();
+bool8 S9xDeinitUpdate (int, int);
+bool8 S9xContinueUpdate (int, int);
+void S9xReRefresh (void);
+void S9xSyncSpeed (void);
 
-#ifdef GFX_MULTI_FORMAT
-bool8 S9xSetRenderPixelFormat (int format);
-#endif
-
-END_EXTERN_C
+// called instead of S9xDisplayString if set to non-NULL
+extern void (*S9xCustomDisplayString) (const char *, int, int, bool, int type);
 
 #endif
-

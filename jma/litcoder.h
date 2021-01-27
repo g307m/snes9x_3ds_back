@@ -4,8 +4,7 @@ Copyright (C) 2001-4 Igor Pavlov ( http://www.7-zip.org )
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
+License version 2.1 as published by the Free Software Foundation.
 
 This library is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -63,7 +62,7 @@ public:
       // UINT32 aBit = m_Decoders[1 + aMatchBit][aSymbol].Decode(aRangeDecoder);
       // aSymbol = (aSymbol << 1) | aBit;
       UINT32 aBit;
-      RC_GETBIT2(kNumMoveBits, m_Decoders[1 + aMatchBit][aSymbol].m_Probability, aSymbol, 
+      RC_GETBIT2(kNumMoveBits, m_Decoders[1 + aMatchBit][aSymbol].m_Probability, aSymbol,
           aBit = 0, aBit = 1)
       if (aMatchBit != aBit)
       {
@@ -91,7 +90,7 @@ public:
   CDecoder(): m_Coders(0) {}
   ~CDecoder()  { Free(); }
   void Free()
-  { 
+  {
     delete []m_Coders;
     m_Coders = 0;
   }

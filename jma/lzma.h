@@ -1,11 +1,11 @@
 /*
+Copyright (C) 2005-2006 NSRT Team ( http://nsrt.edgeemu.com )
 Copyright (C) 2002 Andrea Mazzoleni ( http://advancemame.sf.net )
 Copyright (C) 2001-4 Igor Pavlov ( http://www.7-zip.org )
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
+License version 2.1 as published by the Free Software Foundation.
 
 This library is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -67,16 +67,16 @@ protected:
   }
 };
 
-const int kNumPosSlotBits = 6; 
-const int kDicLogSizeMax = 28; 
-const int kDistTableSizeMax = kDicLogSizeMax * 2; 
+const int kNumPosSlotBits = 6;
+const int kDicLogSizeMax = 28;
+const int kDistTableSizeMax = kDicLogSizeMax * 2;
 
 extern UINT32 kDistStart[kDistTableSizeMax];
-const BYTE kDistDirectBits[kDistTableSizeMax] = 
+const BYTE kDistDirectBits[kDistTableSizeMax] =
 {
   0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9,
-  10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15, 16, 16, 17, 17, 18, 18, 19, 19, 
-  20, 20, 21, 21, 22, 22, 23, 23, 24, 24, 25, 25, 26, 26 
+  10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15, 16, 16, 17, 17, 18, 18, 19, 19,
+  20, 20, 21, 21, 22, 22, 23, 23, 24, 24, 25, 25, 26, 26
 };
 
 const UINT32 kNumLenToPosStates = 4;

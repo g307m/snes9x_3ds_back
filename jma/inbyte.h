@@ -4,8 +4,7 @@ Copyright (C) 2001-4 Igor Pavlov ( http://www.7-zip.org )
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
+License version 2.1 as published by the Free Software Foundation.
 
 This library is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -39,7 +38,6 @@ class CInByte
 public:
   CInByte(UINT32 aBufferSize = 0x100000);
   ~CInByte();
-  
   void Init(ISequentialInStream *aStream);
 
   bool ReadByte(BYTE &aByte)
